@@ -108,8 +108,6 @@ app.post('/students/edit/:id', async (req, res) => {
   }
 });
 
-
-
 // Route để xóa sinh viên
 app.post('/students/delete', async (req, res) => {
   const { deleteMSSV } = req.body;
@@ -130,43 +128,80 @@ app.post('/students/delete', async (req, res) => {
   }
 });
 
-// Thêm route cho trang Thống Kê
-  app.get('/statistics', async (req, res) => {
-    try {
-      // Lấy danh sách sinh viên từ MongoDB (tương tự như ở route /students)
-      const students = await Student.find();
-      res.render('manageStudents.ejs', { students });
-    } catch (error) {
-      res.status(500).send(error.message);
+// Thêm route cho trang Thống Kê Sinh Viên
+app.get('/studentStatistics', async (req, res) => {
+  try {
+    // Lấy dữ liệu sinh viên từ MongoDB
+    const students = await Student.find();
+
+    // Tính toán thống kê theo ngành học
+    const nganhStatistics = calculateNganhStatistics(students);
+
+    // Render trang thống kê theo ngành học bằng EJS
+    res.render('studentStatistics', { nganhStatistics });
+  } catch (error) {
+    console.error('Error fetching students:', error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Hàm tính toán thống kê theo ngành học
+function calculateNganhStatistics(students) {
+  const nganhStatistics = {};
+
+  students.forEach(student => {
+    const nganh = student.Ngành;
+
+    if (nganhStatistics[nganh]) {
+      nganhStatistics[nganh].studentCount += 1;
+    } else {
+      nganhStatistics[nganh] = {
+        nganh: nganh,
+        studentCount: 1
+      };
     }
   });
 
-// Route để hiển thị biểu đồ cột thống kê sinh viên theo năm sinh
-app.get('/statistics/chart', async (req, res) => {
-  try {
-    // Lấy dữ liệu thống kê theo năm sinh từ cơ sở dữ liệu
-    const statsByYear = await Student.aggregate([
-      {
-        $group: {
-          _id: '$NămSinh',
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: {
-          _id: 1
-        }
-      }
-    ]);
+  return Object.values(nganhStatistics);
+}
 
-    // Chuẩn bị dữ liệu cho biểu đồ cột
-    const labels = statsByYear.map(item => item._id);
-    const data = statsByYear.map(item => item.count);
-    res.render('statisticsChart.ejs', { labels, data });
+// Thêm route cho trang Thống Kê Sinh Viên theo Năm Sinh
+app.get('/studentStatisticsByYear', async (req, res) => {
+  try {
+    // Lấy dữ liệu sinh viên từ MongoDB
+    const students = await Student.find();
+
+    // Tính toán thống kê theo năm sinh
+    const yearStatistics = calculateYearStatistics(students);
+
+    // Render trang thống kê theo năm sinh bằng EJS
+    res.render('studentStatisticsByYear', { yearStatistics });
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error('Error fetching students:', error.message);
+    res.status(500).send('Internal Server Error');
   }
 });
+
+// Hàm tính toán thống kê theo năm sinh
+function calculateYearStatistics(students) {
+  const yearStatistics = {};
+
+  students.forEach(student => {
+    const yearOfBirth = student["Năm sinh"];
+
+    if (yearStatistics[yearOfBirth]) {
+      yearStatistics[yearOfBirth].studentCount += 1;
+    } else {
+      yearStatistics[yearOfBirth] = {
+        yearOfBirth: yearOfBirth,
+        studentCount: 1
+      };
+    }
+  });
+
+  return Object.values(yearStatistics);
+}
+
 
 // Khởi động server
 app.listen(PORT, () => {
