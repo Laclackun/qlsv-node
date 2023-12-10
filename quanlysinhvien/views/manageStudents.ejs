@@ -22,7 +22,7 @@
   <h1>Thêm Sửa Xóa Sinh Viên</h1>
 
   <!-- Nút kích hoạt hiển thị form thêm mới -->
-  <button id="showAddForm">Hiển Thị Form Thêm Sinh Viên</button>
+  <button id="showAddForm">Form Thêm Sinh Viên</button>
   
     <!-- Form thêm mới sinh viên -->
     <form id="addForm" action="/students" method="post">
@@ -41,37 +41,8 @@
       <button type="submit">Thêm Sinh Viên</button>
     </form>
 
-  <!-- Nút kích hoạt hiển thị form sửa thông tin -->
-  <button id="showEditForm">Hiển Thị Form Sửa Thông Tin</button>
-  
-  <!-- Form sửa thông tin sinh viên -->
-  <form id="editForm" action="/editStudent" method="get">
-    <label for="editMSSV">MSSV:</label>
-    <select id="editMSSV" name="editMSSV">
-      <% students.forEach(student => { %>
-        <option value="<%= student.MSSV %>"><%= student.MSSV %></option>
-      <% }); %>
-    </select>
-    <button type="submit">Chọn Sinh Viên</button>
-  </form>
-
-  <!-- Khung hiển thị thông tin sinh viên sau khi chọn -->
-  <div id="selectedStudentInfo" style="display: none;">
-    <h2>Thông Tin Sinh Viên</h2>
-    <label for="editTên">Tên:</label>
-    <input type="text" id="editTên" name="editTên" required>
-    
-    <label for="editNgành">Ngành:</label>
-    <input type="text" id="editNgành" name="editNgành" required>
-    
-    <label for="editNămSinh">Năm Sinh:</label>
-    <input type="number" id="editNămSinh" name="editNăm sinh" required>
-
-    <button type="submit" id="editStudentSubmit">Sửa Thông Tin</button>
-  </div>
-
   <!-- Nút kích hoạt hiển thị form xóa sinh viên -->
-  <button id="showDeleteForm">Hiển Thị Form Xóa Sinh Viên</button>
+  <button id="showDeleteForm">Form Xóa Sinh Viên</button>
   
   <!-- Form xóa sinh viên -->
   <form id="deleteForm" action="/students/delete" method="post">
@@ -79,12 +50,20 @@
     <input type="text" id="deleteMSSV" name="deleteMSSV" required>
     <button type="submit">Xóa Sinh Viên</button>
   </form>
-  
+
   <!-- Hiển thị danh sách sinh viên -->
   <h2>Danh Sách Sinh Viên</h2>
   <ul>
     <% students.forEach(student => { %>
-      <li><%= student.MSSV %> - <%= student.Tên %> - <%= student.Ngành %> - <%= student["Năm sinh"] %></li>
+      <li>
+        <form class="edit-form" action="/students/edit/<%= student._id %>" method="post">
+          <span><%= student.MSSV %></span> -
+          <span><input type="text" name="Tên" value="<%= student.Tên %>"></span> -
+          <span><input type="text" name="Ngành" value="<%= student.Ngành %>"></span> -
+          <span><input type="number" name="Năm sinh" value="<%= student["Năm sinh"] %>"></span>
+          <button type="submit">Lưu</button>
+        </form>
+      </li>
     <% }); %>
   </ul>
 
@@ -95,28 +74,61 @@
       $('#addForm').hide();
       $('#editForm').hide();
       $('#deleteForm').hide();
-    });
+      $('#selectedStudentInfo').hide();
+    
+      // Hiển thị form thêm mới khi click vào nút "Hiển Thị Form Thêm Sinh Viên"
+      $('#showAddForm').click(function() {
+        $('#addForm').show();
+        $('#editForm').hide();
+        $('#deleteForm').hide();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      });
+    
+      // Hiển thị form sửa thông tin khi click vào nút "Hiển Thị Form Sửa Thông Tin"
+      $('#showEditForm').click(function() {
+        $('#addForm').hide();
+        $('#editForm').show();
+        $('#deleteForm').hide();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      });
+    
+      // Hiển thị form xóa sinh viên khi click vào nút "Hiển Thị Form Xóa Sinh Viên"
+      $('#showDeleteForm').click(function() {
+        $('#addForm').hide();
+        $('#editForm').hide();
+        $('#deleteForm').show();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      })
+  
+    $('.editable').on('blur', function() {
+      const studentId = $(this).data('id');
+      const field = $(this).data('field');
+      const value = $(this).text();
 
-    // Hiển thị form thêm mới khi click vào nút "Hiển Thị Form Thêm Sinh Viên"
-    $('#showAddForm').click(function() {
-      $('#addForm').show();
-      $('#editForm').hide();
-      $('#deleteForm').hide();
+      // Gửi request cập nhật thông tin sinh viên
+      $.ajax({
+        url: `/students/edit/${studentId}`,
+        method: 'post',
+        data: { field, value },
+        success: function(response) {
+          console.log(response);
+        },
+        error: function(error) {
+          console.error('Error updating student data:', error);
+        }
+      });
     });
+  });
 
-    // Hiển thị form sửa thông tin khi click vào nút "Hiển Thị Form Sửa Thông Tin"
-    $('#showEditForm').click(function() {
-      $('#addForm').hide();
-      $('#editForm').show();
-      $('#deleteForm').hide();
+    // Hiển thị form khi click vào nút "Sửa"
+    $('li').on('click', function() {
+      // Ẩn tất cả các form khác
+      $('.edit-form').hide();
+      
+      // Hiển thị form của hàng đang được click
+      $(this).find('.edit-form').show();
     });
+  </script>  
 
-    // Hiển thị form xóa sinh viên khi click vào nút "Hiển Thị Form Xóa Sinh Viên"
-    $('#showDeleteForm').click(function() {
-      $('#addForm').hide();
-      $('#editForm').hide();
-      $('#deleteForm').show();
-    });
-  </script>
 </body>
 </html>
