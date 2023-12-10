@@ -1,0 +1,122 @@
+<!-- views/manageStudents.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thêm Sửa Xóa Sinh Viên - Student Management System</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <style>
+    /* Để mẫu giao diện đẹp hơn */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Thêm Sửa Xóa Sinh Viên</h1>
+
+  <!-- Nút kích hoạt hiển thị form thêm mới -->
+  <button id="showAddForm">Hiển Thị Form Thêm Sinh Viên</button>
+  
+    <!-- Form thêm mới sinh viên -->
+    <form id="addForm" action="/students" method="post">
+      <label for="MSSV">MSSV:</label>
+      <input type="text" id="MSSV" name="MSSV" required>
+      
+      <label for="Tên">Tên:</label>
+      <input type="text" id="Tên" name="Tên" required>
+      
+      <label for="Ngành">Ngành:</label>
+      <input type="text" id="Ngành" name="Ngành" required>
+      
+      <label for="NămSinh">Năm Sinh:</label>
+      <input type="number" id="NămSinh" name="Năm sinh" required>
+  
+      <button type="submit">Thêm Sinh Viên</button>
+    </form>
+
+  <!-- Nút kích hoạt hiển thị form sửa thông tin -->
+  <button id="showEditForm">Hiển Thị Form Sửa Thông Tin</button>
+  
+  <!-- Form sửa thông tin sinh viên -->
+  <form id="editForm" action="/editStudent" method="get">
+    <label for="editMSSV">MSSV:</label>
+    <select id="editMSSV" name="editMSSV">
+      <% students.forEach(student => { %>
+        <option value="<%= student.MSSV %>"><%= student.MSSV %></option>
+      <% }); %>
+    </select>
+    <button type="submit">Chọn Sinh Viên</button>
+  </form>
+
+  <!-- Khung hiển thị thông tin sinh viên sau khi chọn -->
+  <div id="selectedStudentInfo" style="display: none;">
+    <h2>Thông Tin Sinh Viên</h2>
+    <label for="editTên">Tên:</label>
+    <input type="text" id="editTên" name="editTên" required>
+    
+    <label for="editNgành">Ngành:</label>
+    <input type="text" id="editNgành" name="editNgành" required>
+    
+    <label for="editNămSinh">Năm Sinh:</label>
+    <input type="number" id="editNămSinh" name="editNăm sinh" required>
+
+    <button type="submit" id="editStudentSubmit">Sửa Thông Tin</button>
+  </div>
+
+  <!-- Nút kích hoạt hiển thị form xóa sinh viên -->
+  <button id="showDeleteForm">Hiển Thị Form Xóa Sinh Viên</button>
+  
+  <!-- Form xóa sinh viên -->
+  <form id="deleteForm" action="/students/delete" method="post">
+    <label for="deleteMSSV">MSSV:</label>
+    <input type="text" id="deleteMSSV" name="deleteMSSV" required>
+    <button type="submit">Xóa Sinh Viên</button>
+  </form>
+  
+  <!-- Hiển thị danh sách sinh viên -->
+  <h2>Danh Sách Sinh Viên</h2>
+  <ul>
+    <% students.forEach(student => { %>
+      <li><%= student.MSSV %> - <%= student.Tên %> - <%= student.Ngành %> - <%= student["Năm sinh"] %></li>
+    <% }); %>
+  </ul>
+
+  <!-- JavaScript để điều khiển hiển thị form -->
+  <script>
+    $(document).ready(function() {
+      // Ẩn tất cả các form khi trang tải
+      $('#addForm').hide();
+      $('#editForm').hide();
+      $('#deleteForm').hide();
+    });
+
+    // Hiển thị form thêm mới khi click vào nút "Hiển Thị Form Thêm Sinh Viên"
+    $('#showAddForm').click(function() {
+      $('#addForm').show();
+      $('#editForm').hide();
+      $('#deleteForm').hide();
+    });
+
+    // Hiển thị form sửa thông tin khi click vào nút "Hiển Thị Form Sửa Thông Tin"
+    $('#showEditForm').click(function() {
+      $('#addForm').hide();
+      $('#editForm').show();
+      $('#deleteForm').hide();
+    });
+
+    // Hiển thị form xóa sinh viên khi click vào nút "Hiển Thị Form Xóa Sinh Viên"
+    $('#showDeleteForm').click(function() {
+      $('#addForm').hide();
+      $('#editForm').hide();
+      $('#deleteForm').show();
+    });
+  </script>
+</body>
+</html>
