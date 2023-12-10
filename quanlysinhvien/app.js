@@ -83,35 +83,31 @@ app.post('/students', async (req, res) => {
   }
 });
 
-// Thêm route cho trang sửa thông tin sinh viên
-app.get('/editStudent', (req, res) => {
-  res.render('editStudent.ejs');
-});
-
-// Route để sửa thông tin sinh viên
-app.post('/students/edit', async (req, res) => {
-  const { editMSSV, editTên, editNgành, "editNăm sinh": editYearOfBirth } = req.body;
+// Route để xử lý yêu cầu cập nhật thông tin sinh viên
+app.post('/students/edit/:id', async (req, res) => {
+  const studentId = req.params.id;
+  const { Tên, Ngành, "Năm sinh": yearOfBirth } = req.body;
 
   try {
-    // Tìm sinh viên với MSSV cung cấp
-    const studentToEdit = await Student.findOne({ _id: editMSSV });
+    // Tìm sinh viên theo ID và cập nhật thông tin
+    const result = await Student.findByIdAndUpdate(
+      studentId,
+      { $set: { Tên, Ngành, "Năm sinh": yearOfBirth } },
+      { new: true }
+    );
 
-    if (!studentToEdit) {
+    if (!result) {
       // Nếu không tìm thấy sinh viên, gửi mã trạng thái 404
       res.status(404).send('Không tìm thấy sinh viên');
     } else {
-      // Nếu tìm thấy sinh viên, cập nhật thông tin
-      studentToEdit.Tên = editTên;
-      studentToEdit.Ngành = editNgành;
-      studentToEdit["Năm sinh"] = editYearOfBirth;
-
-      await studentToEdit.save();
-      res.status(200).send('Sửa thông tin sinh viên thành công');
+      // Nếu thông tin sinh viên được cập nhật thành công, chuyển hướng về trang danh sách sinh viên
+      res.redirect('/studentsList');
     }
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
 
 
 // Route để xóa sinh viên
