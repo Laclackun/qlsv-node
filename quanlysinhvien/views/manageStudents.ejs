@@ -1,0 +1,134 @@
+<!-- views/manageStudents.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thêm Sửa Xóa Sinh Viên - Student Management System</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <style>
+    /* Để mẫu giao diện đẹp hơn */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Thêm Sửa Xóa Sinh Viên</h1>
+
+  <!-- Nút kích hoạt hiển thị form thêm mới -->
+  <button id="showAddForm">Form Thêm Sinh Viên</button>
+  
+    <!-- Form thêm mới sinh viên -->
+    <form id="addForm" action="/students" method="post">
+      <label for="MSSV">MSSV:</label>
+      <input type="text" id="MSSV" name="MSSV" required>
+      
+      <label for="Tên">Tên:</label>
+      <input type="text" id="Tên" name="Tên" required>
+      
+      <label for="Ngành">Ngành:</label>
+      <input type="text" id="Ngành" name="Ngành" required>
+      
+      <label for="NămSinh">Năm Sinh:</label>
+      <input type="number" id="NămSinh" name="Năm sinh" required>
+  
+      <button type="submit">Thêm Sinh Viên</button>
+    </form>
+
+  <!-- Nút kích hoạt hiển thị form xóa sinh viên -->
+  <button id="showDeleteForm">Form Xóa Sinh Viên</button>
+  
+  <!-- Form xóa sinh viên -->
+  <form id="deleteForm" action="/students/delete" method="post">
+    <label for="deleteMSSV">MSSV:</label>
+    <input type="text" id="deleteMSSV" name="deleteMSSV" required>
+    <button type="submit">Xóa Sinh Viên</button>
+  </form>
+
+  <!-- Hiển thị danh sách sinh viên -->
+  <h2>Danh Sách Sinh Viên</h2>
+  <ul>
+    <% students.forEach(student => { %>
+      <li>
+        <form class="edit-form" action="/students/edit/<%= student._id %>" method="post">
+          <span><%= student.MSSV %></span> -
+          <span><input type="text" name="Tên" value="<%= student.Tên %>"></span> -
+          <span><input type="text" name="Ngành" value="<%= student.Ngành %>"></span> -
+          <span><input type="number" name="Năm sinh" value="<%= student["Năm sinh"] %>"></span>
+          <button type="submit">Lưu</button>
+        </form>
+      </li>
+    <% }); %>
+  </ul>
+
+  <!-- JavaScript để điều khiển hiển thị form -->
+  <script>
+    $(document).ready(function() {
+      // Ẩn tất cả các form khi trang tải
+      $('#addForm').hide();
+      $('#editForm').hide();
+      $('#deleteForm').hide();
+      $('#selectedStudentInfo').hide();
+    
+      // Hiển thị form thêm mới khi click vào nút "Hiển Thị Form Thêm Sinh Viên"
+      $('#showAddForm').click(function() {
+        $('#addForm').show();
+        $('#editForm').hide();
+        $('#deleteForm').hide();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      });
+    
+      // Hiển thị form sửa thông tin khi click vào nút "Hiển Thị Form Sửa Thông Tin"
+      $('#showEditForm').click(function() {
+        $('#addForm').hide();
+        $('#editForm').show();
+        $('#deleteForm').hide();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      });
+    
+      // Hiển thị form xóa sinh viên khi click vào nút "Hiển Thị Form Xóa Sinh Viên"
+      $('#showDeleteForm').click(function() {
+        $('#addForm').hide();
+        $('#editForm').hide();
+        $('#deleteForm').show();
+        $('#selectedStudentInfo').hide(); // Ẩn khung hiển thị thông tin sinh viên khi chuyển form
+      })
+  
+    $('.editable').on('blur', function() {
+      const studentId = $(this).data('id');
+      const field = $(this).data('field');
+      const value = $(this).text();
+
+      // Gửi request cập nhật thông tin sinh viên
+      $.ajax({
+        url: `/students/edit/${studentId}`,
+        method: 'post',
+        data: { field, value },
+        success: function(response) {
+          console.log(response);
+        },
+        error: function(error) {
+          console.error('Error updating student data:', error);
+        }
+      });
+    });
+  });
+
+    // Hiển thị form khi click vào nút "Sửa"
+    $('li').on('click', function() {
+      // Ẩn tất cả các form khác
+      $('.edit-form').hide();
+      
+      // Hiển thị form của hàng đang được click
+      $(this).find('.edit-form').show();
+    });
+  </script>  
+
+</body>
+</html>

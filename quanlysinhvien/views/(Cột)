@@ -1,0 +1,78 @@
+<!-- views/studentStatistics.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<style>
+    canvas {
+        width: 1000px; 
+        height: 150px; 
+        display: block;
+        margin: 20px auto; 
+    }
+</style>
+<body>
+    <h1>Thống kê sinh viên theo ngành học</h1>
+    <a href="/studentStatisticsByYear">Thống kê theo năm sinh</a></li>
+
+    <% if (nganhStatistics && nganhStatistics.length > 0) { %>
+        <!-- Bảng Thống Kê -->
+        <table border="1">
+            <tr>
+                <th>Ngành học</th>
+                <th>Số lượng sinh viên</th>
+            </tr>
+            <% nganhStatistics.forEach(nganh => { %>
+                <tr>
+                    <td><%= nganh.nganh %></td>
+                    <td><%= nganh.studentCount %></td>
+                </tr>
+            <% }); %>
+        </table>
+
+        <!-- Biểu Đồ Cột -->
+        <canvas id="nganhChart" width="300" height="100"></canvas>
+
+        <script>
+            // Dữ liệu thống kê từ server
+            const nganhStatistics = JSON.parse('<%- JSON.stringify(nganhStatistics || []) %>');
+            console.log('Nganh Statistics:', nganhStatistics);
+        
+            // Tách dữ liệu để vẽ biểu đồ
+            const nganhLabels = nganhStatistics.map(item => item.nganh);
+            const studentCounts = nganhStatistics.map(item => item.studentCount);
+        
+            // Vẽ biểu đồ cột
+            const ctx = document.getElementById('nganhChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: nganhLabels,
+                    datasets: [
+                        {
+                            label: 'Số lượng sinh viên',
+                            data: studentCounts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true }
+                    }
+                }
+            });
+        </script>
+    <% } else { %>
+        <p>No data available for student statistics.</p>
+    <% } %>
+</body>
+</html>
